@@ -63,7 +63,7 @@ export default defineNuxtConfig({
           async: true,
         },
         {
-          children: 'console.log("Tech Blog Version:", "v1.1.5")',
+          children: 'console.log("Tech Blog Version:", "v1.1.6")',
         },
       ],
     },
