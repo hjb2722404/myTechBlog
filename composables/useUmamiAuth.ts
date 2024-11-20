@@ -8,7 +8,7 @@ const isAuthenticated = ref(false)
 export const useUmamiAuth = () => {
   const config = useRuntimeConfig()
 
-  const login = async () => {
+  const login = async (retryCount = 0) => {
     try {
       console.log('Attempting to login with username:', config.public.umamiUsername)
       
@@ -18,6 +18,21 @@ export const useUmamiAuth = () => {
           username: config.public.umamiUsername,
           password: config.public.umamiPassword,
         },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        retry: 3,
+        onRequestError: ({ request, error, response }) => {
+          console.error('Request error:', { error, response })
+        },
+        onResponseError: ({ request, response, options }) => {
+          console.error('Response error:', { 
+            status: response?.status,
+            statusText: response?.statusText,
+            data: response?._data
+          })
+        }
       })
 
       console.log('Login successful, received token')
@@ -31,6 +46,14 @@ export const useUmamiAuth = () => {
         data: error.data,
         status: error.status
       })
+
+      // 如果是 403 错误并且还有重试次数，等待后重试
+      if (error.status === 403 && retryCount < 3) {
+        console.log(`Retrying login attempt ${retryCount + 1}/3...`)
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
+        return login(retryCount + 1)
+      }
+
       throw error
     }
   }

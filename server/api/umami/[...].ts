@@ -18,6 +18,10 @@ export default defineEventHandler(async (event) => {
       console.log('Request body:', JSON.stringify(body))
     }
 
+    // 获取所有原始请求头
+    const headers = event.headers
+    console.log('Original request headers:', Object.fromEntries(headers.entries()))
+
     // 构建请求配置
     const requestConfig = {
       method: event.method,
@@ -25,8 +29,10 @@ export default defineEventHandler(async (event) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'User-Agent': 'Nuxt/Proxy',
-        ...(event.headers.get('authorization') ? {
-          'Authorization': event.headers.get('authorization')
+        'Origin': 'https://analytics.umami.is',
+        'Referer': 'https://analytics.umami.is/',
+        ...(headers.get('authorization') ? {
+          'Authorization': headers.get('authorization')
         } : {})
       },
       ...(body ? { body: JSON.stringify(body) } : {})
@@ -42,6 +48,7 @@ export default defineEventHandler(async (event) => {
     const response = await fetch(target, requestConfig)
     
     console.log('Response status:', response.status)
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()))
 
     // 如果响应不成功，记录详细信息并抛出错误
     if (!response.ok) {
@@ -49,7 +56,8 @@ export default defineEventHandler(async (event) => {
       console.error('Umami API error response:', {
         status: response.status,
         statusText: response.statusText,
-        body: errorText
+        body: errorText,
+        headers: Object.fromEntries(response.headers.entries())
       })
       
       throw createError({
