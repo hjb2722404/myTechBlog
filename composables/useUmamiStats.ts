@@ -34,17 +34,11 @@ export const useUmamiStats = () => {
     try {
       const token = await getToken()
       
-      const response = await fetch(`https://analytics.umami.is/api${path}`, {
+      return await $fetch(`/api/umami${path}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       })
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch stats: ${response.statusText}`)
-      }
-
-      return await response.json()
     } catch (error) {
       console.error('Stats fetch error:', error)
       throw error

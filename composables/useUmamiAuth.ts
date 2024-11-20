@@ -1,31 +1,27 @@
 import { ref } from 'vue'
+import { useRuntimeConfig } from '#imports'
+import { $fetch } from 'ofetch'
 
 const token = ref<string | null>(null)
 const isAuthenticated = ref(false)
 
 export const useUmamiAuth = () => {
+  const config = useRuntimeConfig()
+
   const login = async () => {
     try {
-      const response = await fetch('https://analytics.umami.is/api/auth/login', {
+      const response = await $fetch('/api/umami/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+        body: {
+          username: config.public.umamiUsername,
+          password: config.public.umamiPassword,
         },
-        body: JSON.stringify({
-          username: process.env.UMAMI_USERNAME,
-          password: process.env.UMAMI_PASSWORD,
-        }),
       })
 
-      if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.statusText}`)
-      }
-
-      const data = await response.json()
-      token.value = data.token
+      token.value = response.token
       isAuthenticated.value = true
 
-      return data.token
+      return response.token
     } catch (error) {
       console.error('Login error:', error)
       throw error
