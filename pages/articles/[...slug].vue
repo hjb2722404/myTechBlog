@@ -1,11 +1,12 @@
 <template>
   <div class="article-container">
-    <el-row :gutter="20" justify="center">
+    <el-row :gutter="20">
       <el-col :span="18">
         <ContentDoc v-slot="{ doc }">
           <article class="article">
             <header class="article-header">
               <h1>{{ doc.title }}</h1>
+              <ArticleStats :content="doc.body" :views="articleViews" />
               <div class="article-meta">
                 <time>{{ formatDate(doc.date) }}</time>
                 <div class="tags">
@@ -30,15 +31,30 @@
           </article>
         </ContentDoc>
       </el-col>
+      <el-col :span="6">
+        <div class="sidebar">
+          <PopularArticles />
+        </div>
+      </el-col>
     </el-row>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import CommentSection from '~/components/article/comment-section.vue'
+import ArticleStats from '~/components/analytics/article-stats.vue'
+import PopularArticles from '~/components/analytics/popular-articles.vue'
 
 const route = useRoute()
+const articleViews = ref(0)
+
+onMounted(async () => {
+  // 这里可以从后端 API 获取文章访问量
+  // 现在我们使用模拟数据
+  articleViews.value = Math.floor(Math.random() * 1000)
+})
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('zh-CN', {
@@ -51,9 +67,16 @@ const formatDate = (date: string) => {
 
 <style scoped>
 .article-container {
-  padding: 2rem 1rem;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.article {
+  background-color: var(--bg-primary);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .article-header {
@@ -88,6 +111,30 @@ const formatDate = (date: string) => {
   max-width: none;
 }
 
+.sidebar {
+  position: sticky;
+  top: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .article-container {
+    max-width: 800px;
+  }
+  
+  .el-col-18 {
+    width: 100%;
+  }
+  
+  .el-col-6 {
+    width: 100%;
+    margin-top: 2rem;
+  }
+  
+  .sidebar {
+    position: static;
+  }
+}
+
 @media (max-width: 768px) {
   .article-header h1 {
     font-size: 2rem;
@@ -96,6 +143,10 @@ const formatDate = (date: string) => {
   .article-meta {
     flex-direction: column;
     gap: 0.5rem;
+  }
+  
+  .article {
+    padding: 1rem;
   }
 }
 
