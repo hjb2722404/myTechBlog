@@ -16,7 +16,8 @@
           <div class="icon">
             <i class="el-icon-view" />
           </div>
-          <span>{{ views }} 次访问</span>
+          <span v-if="isLoading">加载中...</span>
+          <span v-else>{{ pageViews }} 次访问</span>
         </div>
       </el-tooltip>
     </div>
@@ -24,21 +25,42 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useUmamiStats } from '~/composables/useUmamiStats'
 
 const props = defineProps<{
-  content: string
-  views?: number
+  content: any
 }>()
+
+const route = useRoute()
+const { getPageViews, isLoading } = useUmamiStats()
+const pageViews = ref(0)
 
 // 计算阅读时间（假设平均阅读速度为每分钟 300 字）
 const readingTime = computed(() => {
-  const wordCount = props.content.trim().split(/\s+/).length
-  return Math.max(1, Math.ceil(wordCount / 300))
+  if (!props.content) return 1
+  
+  // 如果 content 是字符串
+  if (typeof props.content === 'string') {
+    const wordCount = props.content.trim().split(/\s+/).length
+    return Math.max(1, Math.ceil(wordCount / 300))
+  }
+  
+  // 如果 content 是 ParsedContent 对象
+  if (props.content._raw) {
+    const wordCount = props.content._raw.trim().split(/\s+/).length
+    return Math.max(1, Math.ceil(wordCount / 300))
+  }
+  
+  // 如果无法获取内容，返回默认值
+  return 1
 })
 
-// 访问次数，如果没有提供则显示 0
-const views = computed(() => props.views || 0)
+// 获取页面访问量
+onMounted(async () => {
+  pageViews.value = await getPageViews(route.path)
+})
 </script>
 
 <style scoped>

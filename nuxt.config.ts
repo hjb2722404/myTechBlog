@@ -55,7 +55,21 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
         }
-      ]
+      ],
+      script: [
+        {
+          src: 'https://analytics.umami.is/script.js',
+          'data-website-id': 'your-website-id',
+          async: true,
+        },
+      ],
+    },
+  },
+  runtimeConfig: {
+    public: {
+      umamiUsername: process.env.UMAMI_USERNAME,
+      umamiPassword: process.env.UMAMI_PASSWORD,
+      umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
     }
   }
 })

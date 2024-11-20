@@ -6,7 +6,7 @@
           <article class="article">
             <header class="article-header">
               <h1>{{ doc.title }}</h1>
-              <ArticleStats :content="doc.body" :views="articleViews" />
+              <ArticleStats :content="doc" :views="articleViews" />
               <div class="article-meta">
                 <time>{{ formatDate(doc.date) }}</time>
                 <div class="tags">

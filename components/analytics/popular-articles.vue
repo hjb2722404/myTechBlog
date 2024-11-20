@@ -1,73 +1,64 @@
 <template>
   <div class="popular-articles">
     <h3 class="title">热门文章</h3>
-    <div class="articles-list">
-      <div
-        v-for="article in popularArticles"
-        :key="article._path"
+    <div v-if="isLoading" class="loading">
+      <el-skeleton :rows="5" animated />
+    </div>
+    <div v-else-if="error" class="error">
+      加载失败，请稍后重试
+    </div>
+    <div v-else class="article-list">
+      <NuxtLink
+        v-for="article in articles"
+        :key="article.url"
+        :to="article.url"
         class="article-item"
-        @click="navigateToArticle(article._path)"
       >
-        <div class="article-info">
-          <h4 class="article-title">{{ article.title }}</h4>
-          <p class="article-desc">{{ article.description }}</p>
-        </div>
-        <div class="article-stats">
-          <span class="views">{{ article.views }} 次阅读</span>
-        </div>
-      </div>
+        <div class="article-title">{{ getArticleTitle(article.url) }}</div>
+        <div class="article-views">{{ article.pageviews }} 次访问</div>
+      </NuxtLink>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useUmamiStats } from '~/composables/useUmamiStats'
 
-const router = useRouter()
-
-interface Article {
-  _path: string
-  title: string
-  description: string
-  views: number
-}
-
-const popularArticles = ref<Article[]>([])
+const { getPopularArticles, isLoading, error } = useUmamiStats()
+const articles = ref([])
 
 onMounted(async () => {
-  // 这里可以从后端 API 获取热门文章数据
-  // 现在我们使用模拟数据
-  popularArticles.value = [
-    {
-      _path: '/articles/vue3-composition-api',
-      title: 'Vue 3 Composition API 完全指南',
-      description: '深入了解 Vue 3 的 Composition API，掌握响应式编程的精髓',
-      views: 1234
-    },
-    // 添加更多文章...
-  ]
+  articles.value = await getPopularArticles(5)
 })
 
-const navigateToArticle = (path: string) => {
-  router.push(path)
+// 从 URL 中提取文章标题
+const getArticleTitle = (url: string) => {
+  const slug = url.split('/').pop()
+  if (!slug) return '未知文章'
+  return slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
 }
 </script>
 
 <style scoped>
 .popular-articles {
-  padding: 1.5rem;
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .title {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
-.articles-list {
+.article-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -75,56 +66,36 @@ const navigateToArticle = (path: string) => {
 
 .article-item {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
   border-radius: 6px;
-  background-color: var(--bg-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
+  transition: background-color 0.2s;
+  text-decoration: none;
+  color: var(--text-primary);
 }
 
-.article-info {
-  flex: 1;
-  margin-right: 1rem;
+.article-item:hover {
+  background-color: var(--bg-secondary);
 }
 
 .article-title {
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
-.article-desc {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.article-stats {
+.article-views {
   font-size: 0.85rem;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
-.views {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+.loading {
+  padding: 1rem 0;
+}
+
+.error {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-error);
 }
 </style>
