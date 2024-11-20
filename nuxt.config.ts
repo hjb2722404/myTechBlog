@@ -71,10 +71,10 @@ export default defineNuxtConfig({
   nitro: {
     routeRules: {
       '/api/auth/**': {
-        proxy: 'https://analytics.umami.is/api/auth/**'
+        proxy: { to: 'https://analytics.umami.is/api/auth/**' }
       },
       '/api/websites/**': {
-        proxy: 'https://analytics.umami.is/api/websites/**'
+        proxy: { to: 'https://analytics.umami.is/api/websites/**' }
       }
     }
   },
