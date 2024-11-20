@@ -65,6 +65,16 @@ export default defineNuxtConfig({
       ],
     },
   },
+  nitro: {
+    routeRules: {
+      '/api/auth/**': {
+        proxy: 'https://analytics.umami.is/api/auth/**'
+      },
+      '/api/websites/**': {
+        proxy: 'https://analytics.umami.is/api/websites/**'
+      }
+    }
+  },
   runtimeConfig: {
     public: {
       umamiUsername: process.env.UMAMI_USERNAME,

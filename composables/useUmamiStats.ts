@@ -31,23 +31,18 @@ export const useUmamiStats = () => {
   // 获取 Umami token
   const getToken = async () => {
     try {
-      const response = await fetch('https://analytics.umami.is/api/auth/login', {
+      const response = await $fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body: {
           username: config.public.umamiUsername,
           password: config.public.umamiPassword,
-        }),
+        },
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to get Umami token')
-      }
-
-      const data = await response.json()
-      umamiToken.value = data.token
+      umamiToken.value = response.token
     } catch (e) {
       error.value = e as Error
       console.error('Error getting Umami token:', e)
@@ -66,23 +61,21 @@ export const useUmamiStats = () => {
       const start = startAt?.getTime() || Date.now() - 30 * 24 * 60 * 60 * 1000 // 默认30天
       const end = endAt?.getTime() || Date.now()
 
-      const response = await fetch(
-        `https://analytics.umami.is/api/websites/${websiteId}/pageviews?startAt=${start}&endAt=${end}&url=${encodeURIComponent(
-          path
-        )}`,
+      const data = await $fetch(
+        `/api/websites/${websiteId}/pageviews`,
         {
+          params: {
+            startAt: start,
+            endAt: end,
+            url: path,
+          },
           headers: {
             Authorization: `Bearer ${umamiToken.value}`,
           },
         }
       )
 
-      if (!response.ok) {
-        throw new Error('Failed to get page views')
-      }
-
-      const data: PageViewResponse[] = await response.json()
-      return data.reduce((sum, item) => sum + item.y, 0)
+      return (data as PageViewResponse[]).reduce((sum, item) => sum + item.y, 0)
     } catch (e) {
       error.value = e as Error
       console.error('Error getting page views:', e)
@@ -104,23 +97,23 @@ export const useUmamiStats = () => {
       const start = startAt?.getTime() || Date.now() - 30 * 24 * 60 * 60 * 1000
       const end = endAt?.getTime() || Date.now()
 
-      const response = await fetch(
-        `https://analytics.umami.is/api/websites/${websiteId}/metrics?startAt=${start}&endAt=${end}&type=url`,
+      const data = await $fetch(
+        `/api/websites/${websiteId}/metrics`,
         {
+          params: {
+            startAt: start,
+            endAt: end,
+            type: 'url',
+          },
           headers: {
             Authorization: `Bearer ${umamiToken.value}`,
           },
         }
       )
 
-      if (!response.ok) {
-        throw new Error('Failed to get popular articles')
-      }
-
-      const data = await response.json()
-      return data
-        .filter((item: any) => item.url.startsWith('/articles/'))
-        .sort((a: any, b: any) => b.pageviews - a.pageviews)
+      return (data as any[])
+        .filter(item => item.url.startsWith('/articles/'))
+        .sort((a, b) => b.pageviews - a.pageviews)
         .slice(0, limit)
     } catch (e) {
       error.value = e as Error
