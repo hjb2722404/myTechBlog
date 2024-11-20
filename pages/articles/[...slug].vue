@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import CommentSection from '~/components/article/comment-section.vue'
 
 const route = useRoute()
 
@@ -50,7 +51,9 @@ const formatDate = (date: string) => {
 
 <style scoped>
 .article-container {
-  padding: 2rem 0;
+  padding: 2rem 1rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .article-header {
@@ -69,7 +72,7 @@ const formatDate = (date: string) => {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  color: var(--el-text-color-secondary);
+  color: var(--text-secondary);
 }
 
 .tags {
@@ -96,35 +99,42 @@ const formatDate = (date: string) => {
   }
 }
 
-:deep(.article-content .content) {
+:deep(.article-content) {
   line-height: 1.8;
-}
+  
+  h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+  }
 
-:deep(.article-content h2) {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
+  h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.4rem;
+  }
 
-:deep(.article-content h3) {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  font-size: 1.25rem;
-}
+  p {
+    margin: 1rem 0;
+    line-height: 1.8;
+  }
 
-:deep(.article-content p) {
-  margin: 1rem 0;
-}
+  ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
 
-:deep(.article-content ul) {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
+  pre {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: var(--code-bg);
+    overflow-x: auto;
+  }
 
-:deep(.article-content pre) {
-  margin: 1rem 0;
-  padding: 1rem;
-  border-radius: 4px;
-  background-color: var(--el-fill-color-light);
+  code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
 }
 </style>
