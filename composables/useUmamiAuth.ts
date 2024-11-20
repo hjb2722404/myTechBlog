@@ -16,6 +16,7 @@ export const useUmamiAuth = () => {
       const requestBody = {
         username: config.public.umamiUsername,
         password: config.public.umamiPassword,
+        websiteId: config.public.umamiWebsiteId, // 添加 website ID
       }
       console.log('Request body:', JSON.stringify(requestBody))
 
