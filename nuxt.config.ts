@@ -59,8 +59,11 @@ export default defineNuxtConfig({
       script: [
         {
           src: 'https://analytics.umami.is/script.js',
-          'data-website-id': 'your-website-id',
+          'data-website-id': '2f9ef5d9-1a56-4ecf-9d5c-0f2bfee34530',
           async: true,
+        },
+        {
+          children: 'console.log("Tech Blog Version:", "v1.1.0")',
         },
       ],
     },
