@@ -11,13 +11,14 @@
       </el-tooltip>
     </div>
     <div class="stats-item">
-      <el-tooltip content="访问次数">
-        <div class="stat">
-          <div class="icon">
-            <i class="el-icon-view" />
-          </div>
-          <span v-if="isLoading">加载中...</span>
-          <span v-else>{{ pageViews }} 次访问</span>
+      <el-tooltip
+        content="文章访问量"
+        placement="top"
+        :show-after="200"
+      >
+        <div class="stat-item">
+          <el-icon><View /></el-icon>
+          <span>{{ views }}</span>
         </div>
       </el-tooltip>
     </div>
@@ -25,17 +26,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUmamiStats } from '~/composables/useUmamiStats'
+import { View } from '@element-plus/icons-vue'
 
 const props = defineProps<{
   content: any
 }>()
 
 const route = useRoute()
-const { getPageViews, isLoading } = useUmamiStats()
-const pageViews = ref(0)
+const views = ref(0)
+const { getPageViews, isLoading, error } = useUmamiStats()
 
 // 计算阅读时间（假设平均阅读速度为每分钟 300 字）
 const readingTime = computed(() => {
@@ -59,7 +61,11 @@ const readingTime = computed(() => {
 
 // 获取页面访问量
 onMounted(async () => {
-  pageViews.value = await getPageViews(route.path)
+  try {
+    views.value = await getPageViews(route.path)
+  } catch (err) {
+    console.error('Failed to fetch article stats:', err)
+  }
 })
 </script>
 
@@ -91,5 +97,16 @@ onMounted(async () => {
   height: 24px;
   border-radius: 50%;
   background-color: var(--bg-secondary);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.el-icon {
+  font-size: 1rem;
 }
 </style>

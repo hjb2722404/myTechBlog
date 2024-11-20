@@ -73,9 +73,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      umamiUsername: process.env.UMAMI_USERNAME,
-      umamiPassword: process.env.UMAMI_PASSWORD,
       umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
+      umamiApiKey: process.env.UMAMI_API_KEY,
     }
   }
 })
