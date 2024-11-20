@@ -20,7 +20,7 @@ export const useUmamiAuth = () => {
       }
       console.log('Request body:', JSON.stringify(requestBody))
 
-      const response = await $fetch('https://api-gateway.umami.dev/api/auth/login', {
+      const response = await $fetch('https://api-gateway.umami.dev/2f9ef5d9-1a56-4ecf-9d5c-0f2bfee34530/api/auth/login', {
         method: 'POST',
         body: requestBody,
         headers: {
