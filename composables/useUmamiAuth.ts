@@ -12,15 +12,46 @@ export const useUmamiAuth = () => {
     try {
       console.log('Attempting to login with username:', config.public.umamiUsername)
       
+      // 打印请求体以便调试
+      const requestBody = {
+        username: config.public.umamiUsername,
+        password: config.public.umamiPassword,
+      }
+      console.log('Request body:', JSON.stringify(requestBody))
+
       const response = await $fetch('https://api-gateway.umami.dev/api/auth/login', {
         method: 'POST',
-        body: {
-          username: config.public.umamiUsername,
-          password: config.public.umamiPassword,
-        },
+        body: requestBody,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0',
+          'Origin': 'https://my-tech-blog-orcin.vercel.app',
+          'Referer': 'https://my-tech-blog-orcin.vercel.app/'
+        },
+        onRequest({ request, options }) {
+          console.log('Request options:', {
+            method: options.method,
+            headers: options.headers,
+            body: options.body
+          })
+        },
+        onRequestError({ request, error }) {
+          console.error('Request error:', error)
+        },
+        onResponse({ request, response, options }) {
+          console.log('Response:', {
+            status: response.status,
+            headers: response._headers,
+            body: response._data
+          })
+        },
+        onResponseError({ request, response, options }) {
+          console.error('Response error:', {
+            status: response?.status,
+            statusText: response?.statusText,
+            data: response?._data
+          })
         }
       })
 
@@ -33,8 +64,14 @@ export const useUmamiAuth = () => {
       console.error('Login error:', {
         message: error.message,
         data: error.data,
-        status: error.status
+        status: error.status,
+        response: error.response
       })
+
+      // 如果是 400 错误，可能是请求格式问题
+      if (error.status === 400) {
+        console.error('Bad request error. Please check request format and credentials.')
+      }
 
       // 如果是 403 错误并且还有重试次数，等待后重试
       if (error.status === 403 && retryCount < 3) {
