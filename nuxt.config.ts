@@ -72,9 +72,9 @@ export default defineNuxtConfig({
     routeRules: {}
   },
   runtimeConfig: {
+    umamiApiKey: process.env.UMAMI_API_KEY, // 私有配置
     public: {
       umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
-      umamiApiKey: process.env.UMAMI_API_KEY,
     }
   }
 })
