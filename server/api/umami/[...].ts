@@ -10,12 +10,12 @@ export default defineEventHandler(async (event) => {
   console.log('Umami API Request:', {
     path,
     query,
-    fullPath: `https://cloud.umami.is/api/${path}`
+    fullPath: `https://api.umami.is/api/${path}`
   })
 
   try {
     // 构建完整的 URL，包括查询参数
-    const url = new URL(`https://cloud.umami.is/api/${path}`)
+    const url = new URL(`https://api.umami.is/api/${path}`)
     if (query) {
       Object.entries(query).forEach(([key, value]) => {
         if (value !== undefined) {
@@ -40,7 +40,8 @@ export default defineEventHandler(async (event) => {
       console.error('Umami API Error Response:', {
         status: response.status,
         statusText: response.statusText,
-        body: errorText
+        body: errorText,
+        headers: Object.fromEntries(response.headers.entries())
       })
 
       throw createError({
