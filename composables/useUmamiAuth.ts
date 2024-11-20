@@ -12,7 +12,7 @@ export const useUmamiAuth = () => {
     try {
       console.log('Attempting to login with username:', config.public.umamiUsername)
       
-      const response = await $fetch('/api/umami/auth/login', {
+      const response = await $fetch('https://api-gateway.umami.dev/api/auth/login', {
         method: 'POST',
         body: {
           username: config.public.umamiUsername,
@@ -21,17 +21,6 @@ export const useUmamiAuth = () => {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
-        retry: 3,
-        onRequestError: ({ request, error, response }) => {
-          console.error('Request error:', { error, response })
-        },
-        onResponseError: ({ request, response, options }) => {
-          console.error('Response error:', { 
-            status: response?.status,
-            statusText: response?.statusText,
-            data: response?._data
-          })
         }
       })
 

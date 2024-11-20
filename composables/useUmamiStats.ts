@@ -1,4 +1,7 @@
 import { useUmamiAuth } from './useUmamiAuth'
+import { ref } from 'vue'
+import { useRuntimeConfig } from '#imports'
+import { $fetch } from 'ofetch'
 
 interface UmamiStats {
   pageviews: {
@@ -20,8 +23,8 @@ interface UmamiStats {
 }
 
 interface PageViewResponse {
-  x: string // timestamp
-  y: number // count
+  x: string
+  y: number
 }
 
 export const useUmamiStats = () => {
@@ -34,7 +37,7 @@ export const useUmamiStats = () => {
     try {
       const token = await getToken()
       
-      return await $fetch(`/api/umami${path}`, {
+      return await $fetch(`https://api-gateway.umami.dev/api${path}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
