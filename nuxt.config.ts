@@ -69,22 +69,7 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    routeRules: {
-      '/api/auth/**': {
-        proxy: { to: 'https://analytics.umami.is/api/auth/**' }
-      },
-      '/api/websites/**': {
-        proxy: { to: 'https://analytics.umami.is/api/websites/**' }
-      },
-      '/api/**': {
-        cors: true,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }
-      }
-    }
+    routeRules: {}
   },
   runtimeConfig: {
     public: {

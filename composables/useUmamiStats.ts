@@ -1,3 +1,5 @@
+import { useUmamiAuth } from './useUmamiAuth'
+
 interface UmamiStats {
   pageviews: {
     value: number
@@ -24,56 +26,40 @@ interface PageViewResponse {
 
 export const useUmamiStats = () => {
   const config = useRuntimeConfig()
-  const umamiToken = ref('')
+  const { getToken } = useUmamiAuth()
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
 
-  // 获取 Umami token
-  const getToken = async () => {
+  const fetchStats = async (path: string) => {
     try {
-      const response = await $fetch('/api/auth/login', {
-        method: 'POST',
+      const token = await getToken()
+      
+      const response = await fetch(`https://analytics.umami.is/api${path}`, {
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: {
-          username: config.public.umamiUsername,
-          password: config.public.umamiPassword,
+          'Authorization': `Bearer ${token}`,
         },
       })
 
-      umamiToken.value = response.token
-    } catch (e) {
-      error.value = e as Error
-      console.error('Error getting Umami token:', e)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stats: ${response.statusText}`)
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error('Stats fetch error:', error)
+      throw error
     }
   }
 
   // 获取文章页面访问量
   const getPageViews = async (path: string, startAt?: Date, endAt?: Date) => {
-    if (!umamiToken.value) {
-      await getToken()
-    }
-
     try {
       isLoading.value = true
       const websiteId = config.public.umamiWebsiteId
       const start = startAt?.getTime() || Date.now() - 30 * 24 * 60 * 60 * 1000 // 默认30天
       const end = endAt?.getTime() || Date.now()
 
-      const data = await $fetch(
-        `/api/websites/${websiteId}/pageviews`,
-        {
-          params: {
-            startAt: start,
-            endAt: end,
-            url: path,
-          },
-          headers: {
-            Authorization: `Bearer ${umamiToken.value}`,
-          },
-        }
-      )
+      const data = await fetchStats(`/websites/${websiteId}/pageviews?startAt=${start}&endAt=${end}&url=${path}`)
 
       return (data as PageViewResponse[]).reduce((sum, item) => sum + item.y, 0)
     } catch (e) {
@@ -87,29 +73,13 @@ export const useUmamiStats = () => {
 
   // 获取热门文章
   const getPopularArticles = async (limit = 5, startAt?: Date, endAt?: Date) => {
-    if (!umamiToken.value) {
-      await getToken()
-    }
-
     try {
       isLoading.value = true
       const websiteId = config.public.umamiWebsiteId
       const start = startAt?.getTime() || Date.now() - 30 * 24 * 60 * 60 * 1000
       const end = endAt?.getTime() || Date.now()
 
-      const data = await $fetch(
-        `/api/websites/${websiteId}/metrics`,
-        {
-          params: {
-            startAt: start,
-            endAt: end,
-            type: 'url',
-          },
-          headers: {
-            Authorization: `Bearer ${umamiToken.value}`,
-          },
-        }
-      )
+      const data = await fetchStats(`/websites/${websiteId}/metrics?startAt=${start}&endAt=${end}&type=url`)
 
       return (data as any[])
         .filter(item => item.url.startsWith('/articles/'))
