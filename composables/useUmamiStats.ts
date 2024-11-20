@@ -18,8 +18,17 @@ export const useUmamiStats = () => {
         const response = await $fetch<T>(url, {
           params,
           retry: i > 0 ? 1 : 0,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${config.public.umamiToken}`
+          },
           onRequest({ options }) {
-            console.log(`Attempting request to ${url}`, { attempt: i + 1, params })
+            console.log(`Attempting request to ${url}`, { 
+              attempt: i + 1, 
+              params,
+              headers: options.headers 
+            })
           },
           onRequestError({ error }) {
             console.error(`Request error (attempt ${i + 1}):`, error)
@@ -28,13 +37,15 @@ export const useUmamiStats = () => {
           onResponse({ response }) {
             console.log(`Response received (attempt ${i + 1}):`, {
               status: response.status,
-              ok: response._data !== undefined
+              ok: response._data !== undefined,
+              headers: response.headers
             })
           },
           onResponseError({ response }) {
             console.error(`Response error (attempt ${i + 1}):`, {
               status: response.status,
-              data: response._data
+              data: response._data,
+              headers: response.headers
             })
             lastError = new Error(response._data?.message || 'Unknown error')
           }
@@ -52,8 +63,8 @@ export const useUmamiStats = () => {
   const getPageViews = async (path: string) => {
     try {
       isLoading.value = true
-      const response = await fetchWithRetry(
-        `/api/umami/websites/${config.public.umamiWebsiteId}/pageviews`,
+      const response = await fetchWithRetry<{ pageviews: number }>(
+        `${config.public.umamiApiUrl}/websites/${config.public.umamiWebsiteId}/pageviews`,
         {
           url: path,
           startAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).getTime(),
@@ -73,8 +84,8 @@ export const useUmamiStats = () => {
   const getPopularPages = async (limit = 5) => {
     try {
       isLoading.value = true
-      const response = await fetchWithRetry(
-        `/api/umami/websites/${config.public.umamiWebsiteId}/pages`,
+      const response = await fetchWithRetry<{ pages: any[] }>(
+        `${config.public.umamiApiUrl}/websites/${config.public.umamiWebsiteId}/pages`,
         {
           startAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).getTime(),
           endAt: Date.now(),

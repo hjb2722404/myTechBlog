@@ -74,7 +74,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     umamiApiKey: process.env.UMAMI_API_KEY,
     public: {
-      umamiWebsiteId: process.env.UMAMI_WEBSITE_ID
+      umamiWebsiteId: process.env.UMAMI_WEBSITE_ID,
+      umamiApiUrl: 'https://api.umami.is/api',
+      umamiToken: process.env.UMAMI_API_KEY
     }
   }
 })
